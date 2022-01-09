@@ -1,5 +1,6 @@
 package tfip.modserver.addressbook.controller;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.boot.ApplicationArguments;
+import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.server.ResponseStatusException;
 
 import tfip.modserver.addressbook.Contacts;
 import tfip.modserver.addressbook.model.User;
@@ -49,22 +52,13 @@ public class UserController {
     }
 
     private boolean duplicateID(String dir, String id){
-        boolean dup=true;
-        try {
-            List<String> listFileName = Files.list(Path.of(dir))
-                .map(Path::toString)
-                .toList();
-            if (listFileName.isEmpty()){
-                dup = false;
-            }
-            else{
-                dup =  listFileName.contains(id);
-            }
+        Path idFilePath = Path.of(dir+"/"+id);
+        if (Files.exists(idFilePath) && Files.isRegularFile(idFilePath)){
+            return true;
         }
-        catch (IOException e) {
-            logger.info("error checking folder for duplicate id");
+        else{
+            return false;
         }
-        return dup;
     }
 
     @PostMapping(
@@ -81,7 +75,7 @@ public class UserController {
         while(duplicateID( cmddir, id)){
             id = idGenerator();
         }
-        String filename = "/"+id;
+        String filename = id;
         
         userinfo.add("Name: " + user.getName());
         userinfo.add("Email: " + user.getEmail());
@@ -104,14 +98,23 @@ public class UserController {
             String cmddir = applicationArguments.getOptionValues("dataDir").get(0);
             Contacts database = new Contacts(cmddir);
             try{
-                List<String> idFile = database.readFile("001");
+                List<String> idFile = database.readFile(id);
 
+                model.addAttribute("name", idFile.get(0));
+                model.addAttribute("email", idFile.get(1));
+                model.addAttribute("phone", idFile.get(2));
+                model.addAttribute("id", id);
+            }
+            catch (FileNotFoundException e){
+                logger.info("file is not found when retrieving using GET method");
+                model.addAttribute("error", "Error! File is not found");
+                // throw new ResponseStatusException(HttpStatus.NOT_FOUND,"File not found");
             }
             catch (IOException e){
-                logger.info("cannot read file when retrieve using get method");;
+                logger.info("cannot read file when retrieving using GET method");
+                model.addAttribute("error", "Error! File cannot be read");
+                // throw new ResponseStatusException(HttpStatus.NOT_FOUND,"File not found");
             }
-        
-
         return "getid";
     }
 }

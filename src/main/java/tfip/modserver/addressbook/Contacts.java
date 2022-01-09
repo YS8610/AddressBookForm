@@ -2,6 +2,7 @@ package tfip.modserver.addressbook;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -26,8 +27,8 @@ public class Contacts {
 
     public void writeFile(String filename, List<String> userInfo){
         try{
-            Path pFilename = Path.of(dir + filename);
-            Files.write(pFilename,userInfo);
+            Path pFilename = Path.of(dir +"/"+filename);
+            Files.write(pFilename,userInfo,Charset.forName("utf-8"));
         }
         catch (IOException e) {
             System.out.println("cannot write to file " + filename);
@@ -36,7 +37,7 @@ public class Contacts {
 
     public List<String> readFile(String filename) throws IOException, FileNotFoundException{
         List<String> fileContent; 
-        Path pFilename = Path.of(dir + filename);
+        Path pFilename = Path.of(dir +"/" +filename);
         fileContent =  Files.readAllLines(pFilename);
         return fileContent;
         }

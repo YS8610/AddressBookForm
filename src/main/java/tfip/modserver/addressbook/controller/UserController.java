@@ -108,12 +108,12 @@ public class UserController {
             catch (FileNotFoundException e){
                 logger.info("file is not found when retrieving using GET method");
                 model.addAttribute("error", "Error! File is not found");
-                // throw new ResponseStatusException(HttpStatus.NOT_FOUND,"File not found");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"File not found");
             }
             catch (IOException e){
                 logger.info("cannot read file when retrieving using GET method");
                 model.addAttribute("error", "Error! File cannot be read");
-                // throw new ResponseStatusException(HttpStatus.NOT_FOUND,"File not found");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"File not found");
             }
         return "getid";
     }

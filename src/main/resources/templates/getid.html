@@ -7,10 +7,13 @@
     <title>Retrieved User Info</title>
 </head>
 <body>
-    <p th:text="${name}">name</p>
-    <p th:text="${email}">email</p>
-    <p th:text="${phone}">phone</p>
-    <p th:text="${id}">id</p>
+    <span th:text="|Name:  ${name}|">name</span>
+    <br/>
+    <span th:text="|Email:  ${email}|">email</span>
+    <br/>
+    <span th:text="|Phone: ${phone}|">phone</span>
+    <br/>
+    <span th:text="|ID: ${id}|">id</span>
     <p th:text="${error}">error</p>
 </body>
 </html>
